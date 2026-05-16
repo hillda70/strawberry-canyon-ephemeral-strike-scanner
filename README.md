@@ -1,226 +1,81 @@
-# 🍓 Strawberry Canyon — Ephemeral Strike Scanner
+# 🍓 Strawberry Canyon
 
-A lightweight Python scanner for detecting actionable option strikes within **1 ATR of spot** using:
-
-- dual-vendor parity
-- gamma exposure proxies
-- auditable feed hashes
-- structured CSV emit rows
-
-Built for:
-
-- Gamma Garden
-- Strawberry Canyon
-- strike-volume monitoring
-- fast gamma workflows
-- low-entropy options scanning
+> *Two travelers on the Tōkaidō road, bent into sudden rain, pressing forward.*  
+> *The whole is assumed. The parts are what you notice when you look more carefully.*  
+> — After Hiroshige, *Driving Rain at Shōno*, c. 1833
 
 ---
 
-# Philosophy
+Strawberry Canyon is a framework for understanding markets as adaptive physiological systems rather than deterministic machines.
 
-```text
-Simple inputs.
-Hard gates.
-Replayable outputs.
+Most technical analysis assumes mechanism: parts assembled into a whole, signals producing fixed outputs. Strawberry Canyon assumes the opposite. The regime is the whole. The signals are derived from it.
+
+The framework converts structured market data into cross-asset regime surfaces, volatility state models, and execution-oriented signal layers.
+
+The philosophical foundation is **functional contextualism** — the tradition running from William James through Stephen C. Pepper to Steven Hayes. Truth is what works in service of a goal, situated in context. An indicator is not true or false. It is functional or non-functional relative to the current regime and your position within it.
+
+The core phrase: **committed action in context.**
+
+---
+
+## The ecosystem
+
+| Repo | Layer | Description |
+|------|-------|-------------|
+| `strawberry-canyon` | Philosophy & engine | Core framework, regime model, market physiology |
+| [`ripple-prism`](https://github.com/hillda70/ripple-prism) | Structural / gamma | Dealer gamma positioning, systematic flows, liquidity regime transitions |
+| [`strawberry-canyon-ephemeral-strike-scanner`](https://github.com/hillda70/strawberry-canyon-ephemeral-strike-scanner) | Execution | Lightweight options strike scanner for Gamma Garden and Strawberry Canyon workflows |
+| [`gamma-garden-preflight`](https://github.com/hillda70/gamma-garden-preflight) | Execution | Preflight validation layer for Gamma Garden workflows |
+
+---
+
+## Core concepts
+
+**SUI — Scroll Utilization Index**  
+`HiLo% / ATRP` — range utilization relative to expected volatility. Measures how much of the vol budget has been consumed. SUI > 1.0 is nonlinear territory.
+
+**Session Force (S_F)**  
+Directional conviction of the session relative to prior structure. Positive or negative. The primary axis of the phase space.
+
+**Fragility ratio**  
+`ROC(13) / ATRP(14)` — momentum per unit of volatility. Measures whether a move is earning its vol budget.
+
+**Dist_Fib50**  
+Distance from the 50% Fibonacci retracement of the 3-month range, expressed in ATRs. Structural position within the cycle.
+
+**The phase space**
+
+| | IV rising | IV falling |
+|---|---|---|
+| **S_F positive** | Active propagation | Orderly stabilization |
+| **S_F negative** | Downside transmission | Exhaustion / absorption |
+
+---
+
+## Repository structure
+
 ```
-
-The scanner is intentionally minimal.
-
-It does not attempt to predict markets.
-
-It identifies nearby strikes where dealer hedging activity, gamma concentration, and liquidity conditions may create short-lived opportunities worth inspecting.
-
----
-
-# Features
-
-- ✅ Strike filtering within 1 ATR
-- ✅ Dual-vendor parity validation
-- ✅ Gamma exposure estimation
-- ✅ Bid-ask spread checks
-- ✅ SHA-256 feed hashing
-- ✅ Structured emit rows
-- ✅ Trello / Airtable compatible
-- ✅ Strawberry Canyon pipeline friendly
-
----
-
-# Inputs
-
-The scanner expects:
-
-```text
-1. Vendor minute CSV #1
-2. Vendor minute CSV #2
-3. Options chain snapshot CSV
-4. ATR14 CSV
-```
-
-Example vendors:
-
-- MarketChameleon
-- Barchart
-
----
-
-# Core Logic
-
-The scanner calculates:
-
-```text
-dist_atr = abs(strike - spot) / ATR14
-```
-
-Only strikes with:
-
-```text
-dist_atr <= 1.0
-```
-
-are emitted.
-
-The script also validates:
-
-- vendor price agreement
-- liquidity quality
-- gamma concentration
-
-before creating an output row.
-
----
-
-# Example Emit Row
-
-```csv
-emit_id,symbol,expiry,strike,side,spot,atr14,dist_atr,oi,gamma_per_contract,gex_1pct
-sv_gg_001,QQQ,2026-06-19,715,call,712.00,4.04,0.74,1200,0.012,7299994
+strawberry-canyon/
+├── src/          # Core engine and signal computation
+├── docs/         # Framework documentation and working papers
+├── examples/     # Reference implementations
+└── README.md
 ```
 
 ---
 
-# Repository Structure
+## Philosophy
 
-```text
-strawberry-canyon-ephemeral-strike-scanner/
-│
-├── README.md
-├── requirements.txt
-├── LICENSE
-│
-├── scanner/
-│   └── scan_ephemeral_strikes.py
-│
-├── docs/
-│   └── strawberry-canyon-ephemeral-strike-scanner.md
-│
-├── samples/
-│   ├── options_chain_QQQ.csv
-│   ├── marketchameleon_QQQ_1m.csv
-│   └── barchart_QQQ_1m.csv
-│
-└── output/
-    └── sv_emit_rows.csv
-```
+Markets are not machines. They are adaptive systems moving through interacting states — compressing, releasing, propagating, absorbing.
+
+The edge does not come from indicators. It comes from recognizing when movement is likely to propagate, when it is likely to dissipate, and when the system is transitioning between those states.
+
+This is participant ethnography of markets. The observation and the participation are inseparable. The knowledge cannot be obtained any other way.
+
+For the full theoretical framework, see [`docs/manifesto.md`](docs/manifesto.md).
 
 ---
 
-# Installation
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-# Run
-
-```bash
-python scanner/scan_ephemeral_strikes.py
-```
-
----
-
-# Output
-
-The scanner appends rows to:
-
-```text
-output/sv_emit_rows.csv
-```
-
-Each row includes:
-
-- strike
-- side
-- spot
-- ATR distance
-- open interest
-- gamma proxy
-- spread quality
-- parity state
-- feed hashes
-- timestamp
-
----
-
-# Auditability
-
-Every emitted row contains SHA-256 hashes of the underlying vendor files.
-
-This preserves a replayable evidence trail for:
-
-- research
-- journaling
-- automation
-- forensic review
-
----
-
-# Strawberry Canyon
-
-Designed for integration into:
-
-```text
-03_portfolio/gamma
-```
-
-or:
-
-```text
-inbox/gamma_garden
-```
-
-Potential downstream integrations:
-
-- Trello
-- Airtable
-- Obsidian
-- Discord alerts
-- execution dashboards
-
----
-
-# Design Goal
-
-The goal is not maximum complexity.
-
-The goal is:
-
-```text
-Capture high-signal option structure
-with minimal operational friction.
-```
-
----
-
-# License
-
-MIT
-
----
-
-# Author
-
-Darren Hill  
-Strawberry Canyon
+**Strawberry Canyon Partners**  
+Chicago, Illinois · 2026  
+Author: Darren Hill
